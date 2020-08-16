@@ -1,1 +1,0 @@
-sudo mount -t cifs //resourcegroupdiag802.file.core.windows.net/something mountpoint -o vers=3.0,username=resourcegroupdiag802,password=VAfTTwe7nnKbovgFW3fj2uAWP4JxbtQmIdhg8pJykwEZKpBmO4hptnwx5z15T06Dt1ne7nvdqp1GoFlKM4YWuA==,dir_mode=0777,file_mode=0777
