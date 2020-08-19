@@ -8,6 +8,8 @@ Created on Thu Feb 09 11:45:22 2017
 import cv2
 import numpy as np
 import matplotlib
+# Use the 'Agg' backend while running the code to make sure separate plot windows don't open
+# for each image. Use the 'TkAgg' backend when debugging to inspect the images
 matplotlib.use('Agg')
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -15,6 +17,7 @@ import os
 from imgaug import augmenters as iaa
 from errno import EEXIST
 
+# Function to check if directory exists. If not, create it.
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
 
@@ -128,7 +131,7 @@ def preprocess_images(img_dir, output_dir, output_shape = (480, 800)):
         # Third, save the cropped, augmented images
         plot_augment(aug_images, os.path.join(output_dir, label), img_path, output_shape)
 
-# Again, this main function is simply to test out on a small subset of our data. Disregard this
+# This main function is simply to test out on a small subset of our data. Disregard this
 # when we are writing up the training code
 if __name__ == '__main__':
     img_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/data_subset'
