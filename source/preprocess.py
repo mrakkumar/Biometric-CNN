@@ -9,9 +9,22 @@ import cv2
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 from imgaug import augmenters as iaa
+from errno import EEXIST
+
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    try:
+        os.makedirs(mypath)
+    except OSError as exc:
+        if exc.errno == EEXIST and os.path.isdir(mypath):
+            pass
+        else:
+            raise
 
 def dilation(image,k,num_iter):   
     #Using Opening Algorithm to remove noise
@@ -26,19 +39,16 @@ def erosion(image,k,num_iter):
     erosion = cv2.erode(image,kernel,iterations = num_iter)
     return erosion
 
-def cropImage(image, to_save, a=13,b=2,crop=20,erode=1):
-         
+def cropImage(image, a=13, b=2, crop=20, erode=1):
     img = cv2.medianBlur(image,5)
-    plot(img, to_save + "med_blur.jpg")
     th2 = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
                 cv2.THRESH_BINARY,a,b)
-    plot(img, to_save + "threshold.jpg")
+
     # The code that follows draws a rectangle around the area of interest which, in our case, is
     # the hand. (x, y) is the location of the top-left corner of the rectangle, w is its width
-    # and h is its height. I then crop only that portion of the image                    
-    
+    # and h is its height. I then crop only that portion of the image                    s
     ret,thresh = cv2.threshold(img,90,255,0)
-    im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     cnt=None
     for x in contours:
         area = cv2.contourArea(x)
@@ -53,140 +63,74 @@ def cropImage(image, to_save, a=13,b=2,crop=20,erode=1):
     cropped_img[cropped_img < 100] = 0
     cropped_img[cropped_img >= 100] = 255
     cropped_img=abs(255-cropped_img) #Inverts grayscale image
-    img=erosion(cropped_img,3,erode)
-    img=dilation(img,6,erode)
-    img=erosion(img,4,3)
-    #img=np.rot90(img,3)
-    return img
 
-def plot(img,to_save,a=4,b=4):
-    fig = plt.figure(frameon=False)
-    fig.set_size_inches(a, b)
-    ax = plt.Axes(fig, [0., 0., 1., 1.])
-    ax.set_axis_off()
-    fig.add_axes(ax)
-    ax.imshow(img,'gray', aspect = 'normal')
-    fig.savefig(to_save, dpi = 56.75)
-    
-def plot_augment(aug, to_save_base, rows = 480, cols = 800, a = 5, b = 3):
-    i = 1
+    # Not sure of the parameters we had used for erosion and dilation. The ones here only seem
+    # to make it worse XP
+    # cropped_img=erosion(cropped_img,3,erode)
+    # cropped_img=dilation(cropped_img,6,erode)
+    # cropped_img=erosion(cropped_img,4,3)
+    return cropped_img
+
+def plot_augment(aug, to_save_base, orig_img_path, output_shape, a = 5, b = 3):
     j = 0
+    orig_img = orig_img_path[:-4]
     for img in aug:
-        img = img.reshape(rows, cols)
+        # Added a resize command here because I couldn't find it anywhere else - Akshay
+        img = cv2.resize(img, output_shape, interpolation=cv2.INTER_LINEAR)
         fig = plt.figure(frameon=False)
         fig.set_size_inches(a, b)
         ax = plt.Axes(fig, [0., 0., 1., 1.])
         ax.set_axis_off()
         fig.add_axes(ax)
-        ax.imshow(img,'gray', aspect = 'normal')
-        to_save=to_save_base+str(i)+"_"+str(j)+'.jpg'
+        ax.imshow(img, 'gray', aspect = 'auto')
+        mkdir_p(to_save_base)
+        to_save = os.path.join(to_save_base, '{}_{}.jpg'.format(orig_img, str(j)))
         fig.savefig(to_save, dpi = 160)
+        plt.close()
         j += 1
-        if j == 10:
-            i += 1
+        if j == 4:
             j = 0
     
-def augment(path, rows = 480, cols = 800):
-    #st = lambda aug: iaa.Sometimes(0.5, aug)
-    arr = cv2.imread(path, 0)
-    seq = iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
+def augment(arr):
+    seq1 = iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
                           iaa.AdditiveGaussianNoise(loc=0, scale=(0.07, 0.15)),
                           iaa.ContrastNormalization((1, 2.0)),
                           iaa.Affine(shear=(-10, 10))])
-    seq1=iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
+    seq2 = iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
                           iaa.AdditiveGaussianNoise(loc=0, scale=(0.07, 0.15)),
                           iaa.ContrastNormalization((1, 2.0)),
                           iaa.Affine(rotate=(-15, 15))])
-    seq2=iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
+    seq3 = iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
                           iaa.AdditiveGaussianNoise(loc=0, scale=(0.07, 0.15)),
                           iaa.ContrastNormalization((1, 2.0)),
                           iaa.Affine(translate_px={"x": (-16, 16), "y": (-16, 16)})])
-    images_aug = seq.augment_images(arr[np.newaxis, :, :, np.newaxis])
-    images_aug1 = seq1.augment_images(arr[np.newaxis, :, :, np.newaxis])
-    images_aug2 = seq2.augment_images(arr[np.newaxis, :, :, np.newaxis])
-    return [images_aug, images_aug1, images_aug2]
-    
-#def sort(l, aug = 0):
-#    let_list = []
-#    for i in range(len(l)):
-#        let_list += l[i][-6:-4]
-#        l[i] = l[i][:-6]
-#        l[]
-#    l.sort()
-#    j = 0
-#    for i in range(len(l)):
-#        if aug == 1:
-#            j = str(j) + let_list[i]
-#        l[i] = str(l[i]) + "_" + str(j) + ".jpg"
-#        j += 1
-#        if j == 10:
-#            j = 0
-#    print l
-#    return l
+    images_aug1 = seq1.augment_images(arr)
+    images_aug2 = seq2.augment_images(arr)
+    images_aug3 = seq3.augment_images(arr)
+    return [images_aug1, images_aug2, images_aug3]
 
-def formPicFrame(path, text_path, train = 5, val = 3, test = 2):
-    f_image=open(text_path + "picdata_train.txt",'wb')
-    f_image1=open(text_path + "picdata_val.txt",'wb')
-    f_image2=open(text_path + "picdata_test.txt",'wb')
-    f_image3=open(text_path + "picdata.txt",'wb')
-    a_list = []
-    b_list = []
-    c_list = []
-    d_list = []
-    os.chdir(path)
-    #print os.listdir(os.curdir)
-    
-    for file in os.listdir(os.curdir):
-        img = cv2.imread(file, 0)
-        y = np.asarray(img)
-        image=y.ravel()  #Transform 2D matrix into 1D array
-        image.flags.writeable = True
-        # Adjust values to be between 0 and 255 only
-        #print image.shape
-        image[image < 100] = 0
-        image[image >= 100] = 255
-        f_image3.write(image.tostring(None))
-        l = file[-5]
+# Added new function here to save images after augmentation
+# Not sure if we augmented before or after cropping the images
+def preprocess_images(img_dir, output_dir, output_shape = (480, 800)):
+    for img_path in os.listdir(img_dir):
+        img = cv2.imread(os.path.join(img_dir, img_path), 0)
+        label = img_path.split('_')[0]
 
-        if l == 'a':
-            a_list.append(image)
-        elif l == 'b':
-            b_list.append(image)
-        elif l == 'c':
-            c_list.append(image)
-        elif l == 'd':
-            d_list.append(image)
-    n = 0
-    for i in range(len(a_list)):
-        if n < train:
-            f_image.write(a_list[i].tostring(None))
-            f_image.write(b_list[i].tostring(None))
-            f_image.write(c_list[i].tostring(None))
-            f_image.write(d_list[i].tostring(None))
-        elif n < train + val:
-            f_image1.write(a_list[i].tostring(None))
-            f_image1.write(b_list[i].tostring(None))
-            f_image1.write(c_list[i].tostring(None))
-            f_image1.write(d_list[i].tostring(None))
-        else:
-            f_image2.write(a_list[i].tostring(None))
-            f_image2.write(b_list[i].tostring(None))
-            f_image2.write(c_list[i].tostring(None))
-            f_image2.write(d_list[i].tostring(None))
-        n += 1
-        if n == 10:
-            n = 0
-    
-#        if i>7:
-#            if i==10:
-#                f_image2.write(image.tostring(None))
-#                i=0
-#                continue
-#            f_image1.write(image.tostring(None))
-#        else:
-#            f_image.write(image.tostring(None))
+        # First, crop the Region of Interest
+        # Not sure where we 'resized' the cropped image originally, can only find a 'reshape' command
+        # in the 'plot_augment' function
+        cropped_img = cropImage(img, crop = 70)
 
-    f_image.close()
-    f_image1.close()
-    f_image2.close()
-    f_image3.close()
+        # Second, augment the images
+        aug_images = [cropped_img]
+        aug_images.extend(augment(cropped_img))
+
+        # Third, save the cropped, augmented images
+        plot_augment(aug_images, os.path.join(output_dir, label), img_path, output_shape)
+
+# Again, this main function is simply to test out on a small subset of our data. Disregard this
+# when we are writing up the training code
+if __name__ == '__main__':
+    img_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/data_subset'
+    output_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/processed_data_subset'
+    preprocess_images(img_dir, output_dir)
