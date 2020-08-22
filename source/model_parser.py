@@ -77,7 +77,6 @@ class ModelParser():
         model = models.Sequential()
         
         # pop the optimizer if present
-        optimizer = None
         for n, layer in enumerate(self.layers):
             if layer['layername'] in dir(optimizers):
                 optimizer = getattr(optimizers, layer['layername'])
