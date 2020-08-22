@@ -2,8 +2,20 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models, optimizers, losses, initializers
 
 
+<<<<<<< HEAD
+=======
+class ModelClass:
 
-    def make_model(input_shape, num_classes, seed = None):
+    def __init__(self, input_shape, num_classes, seed = None):
+        self.input_shape = input_shape
+        self.num_classes = num_classes
+        self.model = self.make_model(self.input_shape, self.num_classes, seed)
+        self.modelpath = None
+        self.config = None
+        self.compiled = False
+>>>>>>> 8e938dd2808a77c655ab7f8d55468248e0d7f6c3
+
+    def make_model(self, input_shape, num_classes, seed = None):
         # I think Mukund experimented with different seed values in the Glorot function and ensembled them
         initializer = initializers.GlorotUniform(seed = seed)
         model = models.Sequential()
@@ -26,7 +38,7 @@ from tensorflow.keras import datasets, layers, models, optimizers, losses, initi
                       loss = losses.SparseCategoricalCrossentropy(from_logits=True),
                       metrics = ['accuracy'])
 
-        self.model = model
+        return model
 
 
 # Testing the code
@@ -42,15 +54,14 @@ if __name__ == '__main__':
 
     # Add the "channel" axis to the images
     train_images = tf.expand_dims(train_images, axis = 3)
-    test_images = tf.expand_dims(test_images, axis=3)
+    test_images = tf.expand_dims(test_images, axis = 3)
     train_images = train_images / 255
     test_images = test_images / 255
 
     num_epochs = 1
-    model = make_model((rows, cols, 1), 10)
-
+    model_obj = ModelClass((rows, cols, 1), 10)
 
     ### performance and fitting is a separate entity
-    model.fit(train_images, train_labels, epochs = num_epochs)
-    test_loss, test_acc = model.evaluate(test_images, test_labels, verbose = 2)
+    model_obj.model.fit(train_images, train_labels, epochs = num_epochs)
+    test_loss, test_acc = model_obj.model.evaluate(test_images, test_labels, verbose = 2)
     print('\nTest accuracy:', test_acc)
