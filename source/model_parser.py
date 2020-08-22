@@ -9,7 +9,7 @@ Created on Sat Aug 21 17:12:22 2020
 
 __author__      = nnarenraju
 __copyright__   = Copyright 2020, biometric-CNN
-__credits__     = nnarenraju
+__credits__     = akshaykumar, nnarenraju
 __license__     = Apache License 2.0
 __version__     = 1.0.0
 __maintainer__  = nnarenraju
