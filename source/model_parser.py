@@ -2,20 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """
-foo.py
-    Short abstract of foo.py
-    Additional description
+model_parser.py
+    model parser reads model config file and creates uncompiled model
 
 Created on Sat Aug 21 17:12:22 2020
 
 __author__      = nnarenraju
-__copyright__   = Copyright 2020, Project Name
+__copyright__   = Copyright 2020, biometric-CNN
 __credits__     = nnarenraju
 __license__     = Apache License 2.0
 __version__     = 1.0.0
 __maintainer__  = nnarenraju
 __email__       = nnarenraju@gmail.com
-__status__      = ['inProgress', 'inUsage', 'Archived', 'Debugging']
+__status__      = inProgress, Debugging
 
 
 Github Repository: NULL

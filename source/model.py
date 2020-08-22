@@ -2,13 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models, optimizers, losses, initializers
 
 
-class ModelClass():
-
-    def __init__(self):
-        self.model = None
-        self.modelpath = None
-        self.config = None
-        self.compiled = False
 
     def make_model(input_shape, num_classes, seed = None):
         # I think Mukund experimented with different seed values in the Glorot function and ensembled them

@@ -34,7 +34,7 @@ import datetime as dt
 ## local
 import imgread as im
 import preprocess as prep
-from model import ModelClass
+from model_parser import ModelParser
 
 ## TF
 import tensorflow as tf
@@ -82,6 +82,8 @@ class Run():
         self.imgcount = 0
         self.batchsize = 32
         self.filetype = "jpg"
+        self.imgshape = None
+        self.nclasses = None
 
         # Pre-processing params
         self.prepdir = None
@@ -105,7 +107,7 @@ class Run():
         return getattr(im, self.imread)(self.imgfile)
 
     def img_count(self):
-        self.imgcount = len(list(self.datadir.glob('*/*.{}'.format(self.filetype))))
+        self.imgcount = len(list(self.datadir.glob('*/*.{n}'.format(self.filetype))))
 
     def make_dataset(self):
         list_ds = tf.data.Dataset.list_files(str(self.datadir/'*/*'), shuffle=False)
@@ -185,12 +187,15 @@ class Run():
     ###############################################################################
 
     def get_model(self):
-        # Get uncompiled model object from ModelClass
-        nclasses = len(self.get_classes)
-        ipshape = self.train.take(1)[0].shape
-        ## GENERALISE THIS
-        mc = ModelClass()
-        mc.make_model(ipshape, nclasses, seed=self.seed)
+        # Get uncompiled model object from ModelParser
+        self.nclasses = len(self.get_classes)
+        self.imgshape = self.train.take(1)[0].shape
+        
+        # Sanity check
+        self.is_exists(self.modelconfig)
+        # Connect to model_parser
+        mp = ModelParser()
+        mc.make_model(self.imgshape, self.nclasses, seed=self.seed)
         self.Model = mc
 
     def is_exists(self, filename):
@@ -215,7 +220,7 @@ class Run():
             os.mkdir("saved_models/models")
         self.Model.modelpath = 'saved_models/models/model_{}.h5'.format(str(dt.datetime.now().time()))
         self.Model.model.save(self.Model.modelpath)
-        del self.Model.model
+        del self.Model.model #remove this if needed
         # Save ModelClass object
         self.write_pkl(self.Model, filename='saved_models/model_{}.pkl'.format(str(dt.datetime.now().time())))
 
