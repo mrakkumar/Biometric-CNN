@@ -24,16 +24,14 @@ Documentation: NULL
 """
 
 import os
+import numpy
 import logging
 import pathlib
-import argparse
-import numpy as np
 import pickle as pkl
 import datetime as dt
 
 ## local
-import imgread as im
-import preprocess as prep
+#import preprocess as prep
 from model_parser import ModelParser
 
 ## TF
@@ -76,9 +74,10 @@ class Run():
         self.modelconfig = modelconfig
         self.seed = None
         self.savemod = False
-
+        
         # Data params
         self.datadir = pathlib.Path(datadir)
+        self.dataset = None
         self.imgcount = 0
         self.batchsize = 32
         self.filetype = "jpg"
@@ -104,22 +103,24 @@ class Run():
         
 
     def read(self):
+        """ special function - under experimentation """
         return getattr(im, self.imread)(self.imgfile)
 
     def img_count(self):
-        self.imgcount = len(list(self.datadir.glob('*/*.{n}'.format(self.filetype))))
+        self.imgcount = len(list(self.datadir.glob('*/*.{}'.format(self.filetype))))
 
     def make_dataset(self):
+        self.img_count()
         list_ds = tf.data.Dataset.list_files(str(self.datadir/'*/*'), shuffle=False)
-        return list_ds.shuffle(self.imgcount, reshuffle_each_iteration=False)
-
+        self.dataset = list_ds.shuffle(self.imgcount, reshuffle_each_iteration=False)
+        
     def get_classes(self):
-        return np.array(sorted([item.name for item in self.datadir.glob('*') if item.name != "LICENSE.txt"]))
+        return numpy.array(sorted([item.name for item in self.datadir.glob('*') if item.name != "LICENSE.txt"]))
 
-    def split(self, list_ds):
+    def split(self):
         val_size = int(self.imgcount * self.valsize)
-        self.train = list_ds.skip(val_size)
-        self.vals = list_ds.take(val_size)  
+        self.train = self.dataset.skip(val_size)
+        self.vals = self.dataset.take(val_size)  
 
     ### converts a file path to an (img, label) pair ###
     
@@ -135,7 +136,8 @@ class Run():
         # convert the compressed string to a 3D uint8 tensor
         img = tf.image.decode_jpeg(img, channels=3)
         # resize the image to the desired size
-        img_height, img_width, _ = self.train.take(1)[0].shape
+        image, label = self.train.take(1)
+        img_height, img_width, _ = image.numpy().shape
         return tf.image.resize(img, [img_height, img_width])
 
     def process_path(self, file_path):
@@ -194,9 +196,12 @@ class Run():
         # Sanity check
         self.is_exists(self.modelconfig)
         # Connect to model_parser
-        mp = ModelParser()
-        mc.make_model(self.imgshape, self.nclasses, seed=self.seed)
-        self.Model = mc
+        mp = ModelParser(self.modelconfig, self.nclasses, self.imgshape, self.seed)
+        # Reads, cleans and loads the model config file
+        mp.read_input()
+        # Make an uncompiled model
+        mp.make_model()
+        self.Model = mp
 
     def is_exists(self, filename):
         if not os.path.exists(filename):
