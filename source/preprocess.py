@@ -17,6 +17,8 @@ import os
 from imgaug import augmenters as iaa
 from errno import EEXIST
 
+# TODO: Encapsulate functions inside a class definition
+
 # Function to check if directory exists. If not, create it.
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
