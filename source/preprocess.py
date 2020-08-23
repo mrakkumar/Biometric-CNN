@@ -17,7 +17,9 @@ import os
 from imgaug import augmenters as iaa
 from errno import EEXIST
 
-# TODO: Encapsulate functions inside a class definition
+# TODO:
+#  1. Encapsulate functions inside a class definition
+#  2. Normalize images
 
 # Function to check if directory exists. If not, create it.
 def mkdir_p(mypath):
