@@ -1,63 +1,59 @@
-{
+[
 # MODEL DETAILS
 
 {
-"layername"            : 'Conv2D',
+"layername"            : "Conv2D",
 "filters"              : 16,
-"kernel_size"          : (5,5),
-"activation"           : 'relu',
-"input_shape"          : None,
-"kernel_initializer"   : 'GlorotUniform'
+"kernel_size"          : [5,5],
+"activation"           : "relu",
+"input_shape"          : -1,
+"kernel_initializer"   : "GlorotUniform"
 },
 
 {
-"layername"            : 'MaxPool2D',
-"pool_size"            : (2,2)
+"layername"            : "MaxPool2D",
+"pool_size"            : [2,2]
 },
 
 {
-"layername"            : 'Conv2D',
+"layername"            : "Conv2D",
 "filters"              : 64,
-"kernel_size"          : (5,5),
-"activation"           : 'relu'
+"kernel_size"          : [5,5],
+"activation"           : "relu"
 },
 
 {
-"layername"            : 'MaxPool2D',
-"pool_size"            : (2,2)
+"layername"            : "MaxPool2D",
+"pool_size"            : [2,2]
 },
 
 {
-"layername"            : 'Flatten'
+"layername"            : "Flatten"
 },
 
 {
-"layername"            : 'Dense',
-"units"                : 6000,
-"activation"           : 'relu'
+"layername"            : "Dense",
+"units"                : 32,
+"activation"           : "relu"
 },
 
 {
-"layername"            : 'Dropout',
+"layername"            : "Dropout",
 "rate"                 : 0.5
 },
 
 {
-"layername"            : 'Dense',
-"units"                : 'nclasses'
+"layername"            : "Dense",
+"units"                : "nclasses"
 },
 
 {
-"layername"            : 'Dropout',
+"layername"            : "Dropout",
 "rate"                 : 0.5
 },
 
 {
-"layername"            : 'Softmax'
+"layername"            : "Softmax"
 }
 
-
-}
-
-
-
+]
