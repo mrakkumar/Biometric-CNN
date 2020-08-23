@@ -4,7 +4,6 @@
 """
 super_model.py
     Maximum priority model configuration. Overrides modelconfig and modefile.
-    Return -1 to disable
 
 Created on Mon Aug 24 00:01:04 2020
 
