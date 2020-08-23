@@ -1,38 +1,44 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-main.py
-    main function: (run.py, model_parser.py, preprocess.py)
 
-Created on Sat Aug 22 23:35:26 2020
-
-__author__      = 
-__copyright__   = Copyright 2020, biometric-CNN
-__credits__     = 
-__license__     = Apache License 2.0
-__version__     = 1.0.0
-__maintainer__  = 
-__email__       = 
-__status__      = inProgress, Debugging
-
-
-Github Repository: NULL
-
-Documentation: NULL
-
-"""
-
+import logging
 from run import Run
+
+"""
+Please use the following to download flowers dataset:
+    
+dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
+data_dir = tf.keras.utils.get_file(origin=dataset_url, 
+                                   fname='flower_photos', 
+                                   untar=True)
+"""
 
 if __name__ == "__main__":
     
+    # Logging sanity check
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+        
+    # Logging
+    logging.basicConfig(filename='run.log', filemode='w', \
+                        format='%(name)s@%(asctime)s - %(levelname)s - %(message)s',\
+                        datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+    logging.info("Start run module")
+    
+    # Locations
     datadir = '/home/nnarenraju/.keras/datasets/flower_photos'
     modelconfig = 'model.test'
+    
     r = Run(datadir=datadir, modelconfig=modelconfig)
+    r.special = True
+    # set height and width
+    r.height = 180
+    r.width = 180
     
     r.make_dataset()
     r.split()
     r.make_pair()
     r.performance()
     r.get_model()
+    r.save_model()
     
