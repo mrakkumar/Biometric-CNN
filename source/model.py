@@ -39,7 +39,7 @@ class ModelClass:
 
 # Testing the code
 if __name__ == '__main__':
-    # Some code to deal with a cuDNN related error I was getting
+    # Resolving cuDNN error
     physical_devices = tf.config.experimental.list_physical_devices('GPU')
     assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
     config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
