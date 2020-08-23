@@ -81,7 +81,7 @@ def plot_augment(aug, to_save_base, orig_img_path, output_shape, a = 5, b = 3):
     orig_img = orig_img_path[:-4]
     for img in aug:
         # Added a resize command here because I couldn't find it anywhere else - Akshay
-        img = cv2.resize(img, output_shape, interpolation=cv2.INTER_LINEAR)
+        # img = cv2.resize(img, output_shape, interpolation=cv2.INTER_LINEAR)
         fig = plt.figure(frameon=False)
         fig.set_size_inches(a, b)
         ax = plt.Axes(fig, [0., 0., 1., 1.])
