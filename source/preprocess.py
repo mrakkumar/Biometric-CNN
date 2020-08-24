@@ -98,7 +98,7 @@ def plot_augment(aug, to_save_base, orig_img_path, output_shape, a = 5, b = 3):
         if j == 4:
             j = 0
     
-def augment(arr):
+def augment_images(arr):
     seq1 = iaa.Sequential([iaa.GaussianBlur(sigma=(0.7, 1.7)),
                           iaa.AdditiveGaussianNoise(loc=0, scale=(0.07, 0.15)),
                           iaa.ContrastNormalization((1, 2.0)),
@@ -118,7 +118,7 @@ def augment(arr):
 
 # Added new function here to save images after augmentation
 # Not sure if we augmented before or after cropping the images
-def preprocess_images(img_dir, output_dir, output_shape = (480, 800)):
+def preprocess_images(img_dir, output_dir, augment = True, output_shape = (480, 800)):
     for img_path in os.listdir(img_dir):
         img = cv2.imread(os.path.join(img_dir, img_path), 0)
         label = img_path.split('_')[0]
@@ -130,7 +130,8 @@ def preprocess_images(img_dir, output_dir, output_shape = (480, 800)):
 
         # Second, augment the images
         aug_images = [cropped_img]
-        aug_images.extend(augment(cropped_img))
+        if augment:
+            aug_images.extend(augment_images(cropped_img))
 
         # Third, save the cropped, augmented images
         plot_augment(aug_images, os.path.join(output_dir, label), img_path, output_shape)
@@ -140,4 +141,4 @@ def preprocess_images(img_dir, output_dir, output_shape = (480, 800)):
 if __name__ == '__main__':
     img_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/data_subset'
     output_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/processed_data_subset'
-    preprocess_images(img_dir, output_dir)
+    preprocess_images(img_dir, output_dir, augment = True)
