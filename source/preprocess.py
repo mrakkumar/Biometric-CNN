@@ -15,6 +15,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 from imgaug import augmenters as iaa
+from datetime import datetime
 from errno import EEXIST
 
 # TODO:
@@ -118,7 +119,11 @@ def augment_images(arr):
 
 # Added new function here to save images after augmentation
 # Not sure if we augmented before or after cropping the images
-def preprocess_images(img_dir, output_dir, augment = True, output_shape = (480, 800)):
+def preprocess_images(img_dir, output_dir = None, augment = True, output_shape = (480, 800)):
+    # Use current timestamp as output directory if no such directory is specified by the user
+    if not output_dir:
+        output_dir = str(datetime.now())
+
     for img_path in os.listdir(img_dir):
         img = cv2.imread(os.path.join(img_dir, img_path), 0)
         label = img_path.split('_')[0]
@@ -136,9 +141,12 @@ def preprocess_images(img_dir, output_dir, augment = True, output_shape = (480, 
         # Third, save the cropped, augmented images
         plot_augment(aug_images, os.path.join(output_dir, label), img_path, output_shape)
 
+        # Finally, return the output directory path to synchronize with Naren's code
+        return output_dir
+
 # This main function is simply to test out on a small subset of our data. Disregard this
 # when we are writing up the training code
 if __name__ == '__main__':
     img_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/data_subset'
     output_dir = '/home/akshay/PycharmProjects/Biometric-CNN/source/processed_data_subset'
-    preprocess_images(img_dir, output_dir, augment = True)
+    preprocess_images(img_dir, augment = True)
