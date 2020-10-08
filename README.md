@@ -1,4 +1,4 @@
-An implementation of our paper titled, ["An ensemble based hand vein pattern authentication system", 2018.](https://www.researchgate.net/publication/323705119_An_ensemble_based_hand_vein_pattern_authentication_system)
+An implementation of our paper titled, ["An ensemble based hand vein pattern authentication system", 2018](https://www.researchgate.net/publication/323705119_An_ensemble_based_hand_vein_pattern_authentication_system) in TensorFlow 2.0.
 
 Currently in development . . .
 
